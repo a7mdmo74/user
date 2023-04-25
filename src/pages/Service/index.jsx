@@ -3,12 +3,13 @@ import { Chat, Footer, Navbar } from '../../components';
 import { AiFillCamera } from 'react-icons/ai';
 import { BsQuestion } from 'react-icons/bs';
 import { Link } from 'react-router-dom';
-import MainBG from '../../assets/main_bg.jpg';
 
 const Service = () => {
+  const token = localStorage.getItem('token').trim().split('|')[1];
+
   return (
     <div className="bg-white min-h-screen relative">
-      <Navbar />
+      <Navbar token={token} />
       <div className="w-full h-full bg-main-bg bg-no-repeat bg-cover min-h-[90vh] p-4">
         <div className="min-h-[85vh] relative">
           <div className="py-8 max-w-4xl mx-auto flex flex-col justify-center space-y-16 px-4 z-10">

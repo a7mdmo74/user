@@ -3,55 +3,37 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { AiOutlineGoogle } from 'react-icons/ai';
 import { FaFacebookF } from 'react-icons/fa';
 import MainBG from '../../../assets/main_bg.jpg';
-import * as Yup from 'yup';
-import { useFormik } from 'formik';
-import useAuth from '../../../hooks/useAuth';
-import { toast } from 'react-toastify';
-import { FormHelperText } from '@mui/material';
-const Register = () => {
-  const navigate = useNavigate();
-  const { register } = useAuth();
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const initialValues = {
-    fullname: '',
-    email: '',
-    password: '',
-    passwordConfirmation: '',
-    submit: null,
-  };
-  // form field value validation schema
-  const validationSchema = Yup.object().shape({
-    fullname: Yup.string().required('Name is required'),
-    email: Yup.string()
-      .email('Must be a valid email')
-      .max(255)
-      .required('Email is required'),
-    password: Yup.string()
-      .min(6, 'Password should be of minimum 6 characters length')
-      .required('Password is required'),
-    passwordConfirmation: Yup.string().oneOf(
-      [Yup.ref('password'), null],
-      'Passwords must match'
-    ),
-  });
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
 
-  const { errors, values, handleBlur, handleChange, handleSubmit } = useFormik({
-    initialValues,
-    validationSchema,
-    onSubmit: async (values) => {
-      setLoading(true);
-      try {
-        await register(values.email, values.password, values.name);
-        setLoading(false);
-        toast.success('You registered successfully');
-        navigate('/');
-      } catch (error) {
-        setError(error?.message);
-        setLoading(false);
-      }
-    },
-  });
+const Register = ({ setToken }) => {
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+
+  const handleRegister = async (event) => {
+    event.preventDefault();
+
+    try {
+      const response = await axios.post('http://localhost:8000/api/register', {
+        name: username,
+        email,
+        password,
+        confirmPassword: password,
+      });
+      setMessage(response);
+      setToken(response.data.User.token);
+      toast.success('Your account created successfully');
+
+      localStorage.setItem('token', response.data.User.token);
+      navigate('/');
+    } catch (error) {
+      setMessage(error.response);
+      toast.error(error.message);
+    }
+  };
 
   return (
     <div className="min-h-screen relative bg-center flex items-start justify-center">
@@ -73,7 +55,7 @@ const Register = () => {
             Signup
           </NavLink>
         </div>
-        <form noValidate onSubmit={handleSubmit} className="w-full">
+        <form noValidate onSubmit={handleRegister} className="w-full">
           <div className="flex flex-col items-center space-y-6 my-6 w-full">
             <input
               className="bg-gray-200 rounded-xl w-full px-4 py-2 outline-none"
@@ -81,86 +63,36 @@ const Register = () => {
               name="fullname"
               type="text"
               label="fullname"
-              onBlur={handleBlur}
-              onChange={handleChange}
-              value={values.fullname || ''}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
-            {errors.fullname && (
-              <FormHelperText
-                error
-                sx={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textAlign: 'center',
-                }}
-              >
-                {errors.fullname}
-              </FormHelperText>
-            )}
             <input
               className="bg-gray-200 rounded-xl w-full px-4 py-2 outline-none"
               placeholder="E-mail"
               name="email"
               type="email"
-              onBlur={handleBlur}
-              onChange={handleChange}
-              value={values.email}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
-            {errors.email && (
-              <FormHelperText
-                error
-                sx={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textAlign: 'center',
-                }}
-              >
-                {errors.email}
-              </FormHelperText>
-            )}
             <input
               className="bg-gray-200 rounded-xl w-full px-4 py-2 outline-none"
               placeholder="Password"
               name="password"
               type="password"
-              onBlur={handleBlur}
-              onChange={handleChange}
-              value={values.password}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
-            {errors.password && (
-              <FormHelperText
-                error
-                sx={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textAlign: 'center',
-                }}
-              >
-                {errors.password}
-              </FormHelperText>
-            )}
             <input
               className="bg-gray-200 rounded-xl w-full px-4 py-2 outline-none"
               placeholder="Confirm Password"
               name="passwordConfirmation"
               type="password"
-              onBlur={handleBlur}
-              onChange={handleChange}
-              value={values.passwordConfirmation}
             />
-            {errors.passwordConfirmation && (
-              <FormHelperText
-                error
-                sx={{
-                  fontSize: 13,
-                  fontWeight: 500,
-                  textAlign: 'center',
-                }}
-              >
-                {errors.passwordConfirmation}
-              </FormHelperText>
-            )}
-            <button className="w-full p-3 bg-blue-600 rounded-xl text-white text-xl hover:bg-blue-700 transition-all duration-200">
+            <button
+              type="submit"
+              onClick={handleRegister}
+              className="w-full p-3 bg-blue-600 rounded-xl text-white text-xl hover:bg-blue-700 transition-all duration-200"
+            >
               Sign Up
             </button>
             <p className="text-lg font-semibold">

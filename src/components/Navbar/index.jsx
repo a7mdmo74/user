@@ -1,10 +1,34 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import Avatar from '../../assets/profile-pic.svg';
+import axios from 'axios';
 const Navbar = () => {
+  const token = localStorage.getItem('token').trim().split('|')[1];
   const [isActive, setIsActive] = useState(false);
+  const navigate = useNavigate();
+  const logout = async () => {
+    console.log('click');
+    console.log(token);
+    await axios
+      .post('http://localhost:8000/api/logout', null, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        navigate('/auth/register');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const login = () => {
+    navigate('/auth/login');
+  };
+
   return (
-    <nav className="bg-blue-400 w-full shadow-lg shadow-blue-200">
+    <nav className="bg-blue-400 sticky top-0 z-50 w-full shadow-lg shadow-blue-200">
       <div className="flex items-center justify-around sm:justify-center max-w-6xl mx-auto space-x-14 p-4 ">
         <div>
           <img
@@ -20,14 +44,12 @@ const Navbar = () => {
           <li>
             <NavLink to="/service">Service</NavLink>
           </li>
-          <li>
-            <NavLink to="/about">About</NavLink>
-          </li>
+
           <li>
             <NavLink to="/add-child">Child Details</NavLink>
           </li>
           <li>
-            <button>Logout</button>
+            <button onClick={logout}>Logout</button>
           </li>
         </ul>
         <ul
@@ -48,7 +70,11 @@ const Navbar = () => {
             <Link to="/add-child">Child Details</Link>
           </li>
           <li className="hover:bg-gray-300 w-full p-1 rounded-lg">
-            <button>Logout</button>
+            {token.length === 0 ? (
+              <button onClick={login}>Login</button>
+            ) : (
+              <button onClick={logout}>Logout</button>
+            )}
           </li>
         </ul>
         <button className="sm:hidden" onClick={() => setIsActive(!isActive)}>

@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { AiOutlineClose } from 'react-icons/ai';
 import { RiSendPlaneFill } from 'react-icons/ri';
 import { Configuration, OpenAIApi } from 'openai';
-import { toast } from 'react-toastify';
+import toast from 'react-hot-toast';
 const Chat = () => {
   const [isActive, setActive] = useState(false);
   const [prompt, setPrompt] = useState('');
+  const [question, setQuestion] = useState('');
   const [result, setResult] = useState('');
   const configuration = new Configuration({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -16,16 +17,7 @@ const Chat = () => {
     if (!prompt) {
       toast.warning('Enter question...');
     } else {
-      toast.success('ChatBot is thinking', {
-        position: 'top-right',
-        autoClose: 850,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: 'light',
-      });
+      toast.success('ChatBot is thinking');
       const response = await openai.createCompletion({
         model: 'text-davinci-003',
         prompt: `Q: ${prompt}\nA:`,
@@ -36,6 +28,8 @@ const Chat = () => {
         presence_penalty: 0.0,
       });
       setResult(response.data.choices[0].text);
+      setQuestion(prompt);
+      setPrompt('');
     }
   };
 
@@ -62,7 +56,7 @@ const Chat = () => {
         {result && (
           <div>
             <div className="bg-slate-800 p-2 text-white text-lg">
-              Q: {prompt}
+              Q: {question}
             </div>
             <div className="px-2 text-white">R: {result}</div>
           </div>
